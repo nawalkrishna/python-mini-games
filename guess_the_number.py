@@ -1,42 +1,65 @@
 import random
 
-difficulty = input("Choose difficulty level (easy/medium/hard): ").lower()
+DIFFICULTIES = {
+    "easy": (50, None),
+    "medium": (100, 10),
+    "hard": (500, 7),
+}
 
-if difficulty == "easy":
-    max_number = 50
-    max_attempts = None
-elif difficulty == "medium":
-    max_number = 100
-    max_attempts = 10
-else:
-    max_number = 500
-    max_attempts = 7
 
-while True:
-    attempts = 0
-    secret = random.randint(1, max_number)
-    won = False
+def choose_difficulty():
+    """Ask until the player picks a valid difficulty. Returns (max_number, max_attempts)."""
+    while True:
+        choice = input("Choose difficulty (easy/medium/hard): ").strip().lower()
+        if choice in DIFFICULTIES:
+            return DIFFICULTIES[choice]
+        print("Choose easy, medium or hard.")
 
-    while max_attempts is None or attempts < max_attempts:
+
+def get_guess(max_number):
+    """Ask until the player types a whole number in range. Returns the guess."""
+    while True:
         try:
             guess = int(input(f"Guess a number between 1 and {max_number}: "))
         except ValueError:
             print("Please enter a valid number.")
             continue
 
+        if 1 <= guess <= max_number:
+            return guess
+        print(f"Please guess between 1 and {max_number}.")
+
+
+def play_game(max_number, max_attempts):
+    """Play one round. Returns True if the player won, False if not."""
+    secret = random.randint(1, max_number)
+    attempts = 0
+
+    while max_attempts is None or attempts < max_attempts:
+        guess = get_guess(max_number)
         attempts += 1
 
         if guess == secret:
             print(f"Correct! You got it in {attempts} attempts.")
-            won = True
-            break                      
+            return True
         elif guess < secret:
             print("Too low!")
         else:
             print("Too high!")
 
-    if not won:
-        print(f"Out of attempts! The number was {secret}.")
+    print(f"Out of attempts! The number was {secret}.")
+    return False
 
-    if input("Play again? (y/n): ").lower() != "y":
-        break                        
+
+def main():
+    max_number, max_attempts = choose_difficulty()
+
+    while True:
+        play_game(max_number, max_attempts)
+        if input("Play again? (y/n): ").strip().lower() != "y":
+            print("Thanks for playing!")
+            break
+
+
+if __name__ == "__main__":
+    main()
